@@ -6,11 +6,11 @@ using SharpPluginLoader.Core.Memory;
 using SharpPluginLoader.Core.IO;
 
 
-namespace ForceAttack
+namespace ForceAction
 {
-    public class ForceAttack : IPlugin
+    public class ForceAction : IPlugin
     {
-        public string Name => "Force Attack";
+        public string Name => "Force Action";
         public string Author => "Seka";
 
         public PluginData Initialize()
@@ -31,10 +31,10 @@ namespace ForceAttack
 
         public unsafe void OnImGuiRender()
         {
-            ForceAttackTool();
+            ForceActionTool();
         }
 
-        public unsafe void ForceAttackTool()
+        public unsafe void ForceActionTool()
         {
             var monster = Monster.GetAllMonsters().LastOrDefault();
 
