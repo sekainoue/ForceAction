@@ -3,6 +3,7 @@ using SharpPluginLoader.Core.Entities;
 using ImGuiNET;
 using SharpPluginLoader.Core.Actions;
 using SharpPluginLoader.Core.Memory;
+using SharpPluginLoader.Core.IO;
 
 
 namespace ForceAttack
@@ -20,7 +21,10 @@ namespace ForceAttack
             };
         }
 
-        public void OnLoad() { }
+        public void OnLoad() 
+        {
+            KeyBindings.AddKeybind("DoIt", new Keybind<Key>(Key.Z, [Key.LeftControl, Key.LeftShift]));
+        }
 
         private int _selectedActionM;
         private NativeFunction<nint, nint, bool> _doActionFunc = new(0x140269c90);
@@ -52,7 +56,7 @@ namespace ForceAttack
             var actionName = (action is null || action.Instance == 0) ? "N/A" : action.Name;
             int actionId = _selectedActionM;
 
-            if (ImGui.BeginCombo("Monster Action", $"{actionId} {actionName}"))
+            if (ImGui.BeginCombo("Lctrl + Lshift + Z", $"{actionId} {actionName}"))
             {
                 for (var l = 0; l < secondActionListM.Count; ++l)
                 {
@@ -75,8 +79,13 @@ namespace ForceAttack
                 ImGui.EndCombo();
             }
 
-            if (ImGui.Button("Force"))
+            if (KeyBindings.IsPressed("DoIt"))
             {
+                if (monster == null)
+                {
+                    Log.Info($"No Monster.");
+                    return;
+                }    
                 var actionInfo = new ActionInfo(1, actionId);
                 _doActionFunc.Invoke(actionController.Instance, MemoryUtil.AddressOf(ref actionInfo));
                 Log.Info($"{monster?.Type} FORCED {actionId} {actionName}");
