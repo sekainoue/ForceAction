@@ -79,7 +79,7 @@ namespace ForceAction
                 ImGui.EndCombo();
             }
 
-            if (KeyBindings.IsPressed("DoIt"))
+            if (KeyBindings.IsPressed("DoIt") || ImGui.Button("Press to Act##monster"))
             {
                 if (monster == null)
                 {
