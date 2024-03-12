@@ -65,6 +65,7 @@ namespace ForceAction
 
                     actionId = _selectedActionM;
                 }
+
                 ImGui.EndCombo();
             }
 
