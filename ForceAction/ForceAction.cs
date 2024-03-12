@@ -13,13 +13,6 @@ namespace ForceAction
         public string Name => "Force Action";
         public string Author => "Seka";
 
-        public PluginData Initialize()
-        {
-            return new PluginData()
-            {
-                OnImGuiRender = true
-            };
-        }
 
         public void OnLoad() 
         {
@@ -29,12 +22,8 @@ namespace ForceAction
         private int _selectedActionM;
         private NativeFunction<nint, nint, bool> _doActionFunc = new(0x140269c90);
 
-        public unsafe void OnImGuiRender()
-        {
-            ForceActionTool();
-        }
 
-        public unsafe void ForceActionTool()
+        public unsafe void OnImGuiRender()
         {
             var monster = Monster.GetAllMonsters().LastOrDefault();
 
