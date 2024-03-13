@@ -6,21 +6,20 @@ using SharpPluginLoader.Core.Memory;
 using SharpPluginLoader.Core.IO;
 
 
-namespace ForceAction
+namespace MonsterAction
 {
-    public class ForceAction : IPlugin
+    public class MonsterAction : IPlugin
     {
-        public string Name => "Force Action";
+        public string Name => "Monster Action";
         public string Author => "Seka";
 
 
         public void OnLoad() 
         {
-            KeyBindings.AddKeybind("DoIt", new Keybind<Key>(Key.Z, [Key.LeftControl, Key.LeftShift]));
+            KeyBindings.AddKeybind("DoIt", new Keybind<Key>(Key.Z, [Key.LeftShift]));
         }
 
         private int _selectedActionM;
-        private NativeFunction<nint, nint, bool> _doActionFunc = new(0x140269c90);
 
 
         public unsafe void OnImGuiRender()
@@ -45,7 +44,7 @@ namespace ForceAction
             var actionName = (action is null || action.Instance == 0) ? "N/A" : action.Name;
             int actionId = _selectedActionM;
 
-            if (ImGui.BeginCombo("Lctrl + Lshift + Z", $"{actionId} {actionName}"))
+            if (ImGui.BeginCombo("Lshift + Z", $"{actionId} {actionName}"))
             {
                 for (var l = 0; l < secondActionListM.Count; ++l)
                 {
@@ -76,8 +75,8 @@ namespace ForceAction
                     Log.Info($"No Monster.");
                     return;
                 }    
-                var actionInfo = new ActionInfo(1, actionId);
-                _doActionFunc.Invoke(actionController.Instance, MemoryUtil.AddressOf(ref actionInfo));
+
+                monster.ForceAction(actionId);
                 Log.Info($"{monster?.Type} FORCED {actionId} {actionName}");
             }
         }
