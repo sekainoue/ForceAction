@@ -52,7 +52,7 @@ namespace MonsterAction
                     if (action is null || action.Instance == 0)
                         continue;
 
-                    if (ImGui.Selectable(secondActionListM[l]?.Name, l == _selectedActionM))
+                    if (ImGui.Selectable($"{l} {action.Name}", l == _selectedActionM))
                     {
                         _selectedActionM = l;
                     }
