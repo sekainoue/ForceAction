@@ -4,6 +4,8 @@ using ImGuiNET;
 using SharpPluginLoader.Core.Actions;
 using SharpPluginLoader.Core.Memory;
 using SharpPluginLoader.Core.IO;
+using System.Numerics;
+using System.Threading;
 
 
 namespace MonsterAction
@@ -21,12 +23,36 @@ namespace MonsterAction
 
         private int _selectedActionM;
 
+        private Monster? _selectedMonsterA = null;
+
+        public void OnMonsterDestroy(Monster monster) {
+            if (monster == _selectedMonsterA) { _selectedMonsterA = null; }
+        }
+        public void OnMonsterDeath(Monster monster) {
+            if (monster == _selectedMonsterA) { _selectedMonsterA = null; }
+        }
 
         public unsafe void OnImGuiRender()
         {
-            var monster = Monster.GetAllMonsters().LastOrDefault();
+            var monsters = Monster.GetAllMonsters().TakeLast(5).ToArray();
+            if (monsters == null)
+                return;
+            if (ImGui.BeginCombo("Monster Act", $"{_selectedMonsterA}"))
+            {
+                foreach (var monster in monsters)
+                {
+                    if (ImGui.Selectable($"{monster}", _selectedMonsterA == monster))
+                    {
+                        _selectedMonsterA = monster;
+                    }
+                }
+                ImGui.EndCombo();
+            }
 
-            var actionController = monster?.ActionController;
+            if (_selectedMonsterA == null)
+                return;
+
+            var actionController = _selectedMonsterA.ActionController;
 
             if (actionController == null)
                 return;
@@ -64,20 +90,16 @@ namespace MonsterAction
 
                     actionId = _selectedActionM;
                 }
-
                 ImGui.EndCombo();
             }
 
             if (KeyBindings.IsPressed("DoIt") || ImGui.Button("Press to Act##monster"))
             {
-                if (monster == null)
-                {
-                    Log.Info($"No Monster.");
+                if (_selectedMonsterA == null)
                     return;
-                }    
 
-                monster.ForceAction(actionId);
-                Log.Info($"{monster?.Type} FORCED {actionId} {actionName}");
+                _selectedMonsterA.ForceAction(actionId);
+                Log.Info($"{_selectedMonsterA} FORCED {actionId} {actionName}");
             }
         }
     }
