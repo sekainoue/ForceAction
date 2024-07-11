@@ -34,7 +34,7 @@ namespace MonsterAction
 
         public unsafe void OnImGuiRender()
         {
-            var monsters = Monster.GetAllMonsters().TakeLast(5).ToArray();
+            var monsters = Monster.GetAllMonsters().ToArray();
             if (monsters == null)
                 return;
             if (ImGui.BeginCombo("Monster Act", $"{_selectedMonsterA}"))
