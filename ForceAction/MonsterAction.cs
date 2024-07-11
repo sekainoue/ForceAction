@@ -25,12 +25,22 @@ namespace MonsterAction
 
         private Monster? _selectedMonsterA = null;
 
-        public void OnMonsterDestroy(Monster monster) {
-            if (monster == _selectedMonsterA) { _selectedMonsterA = null; }
+        public void OnMonsterDestroy(Monster monster) { if (monster == _selectedMonsterA) { _selectedMonsterA = null; } }
+        public void OnMonsterDeath(Monster monster) { if (monster == _selectedMonsterA) { _selectedMonsterA = null; } }
+        private uint _lastStage;
+        public void OnMonsterCreate(Monster monster) { uint stageID = (uint)Area.CurrentStage; _lastStage = stageID; }
+        public void OnUpdate(float dt) 
+        { 
+            if ((uint)Area.CurrentStage != _lastStage) { 
+                _selectedMonsterA = null; 
+            } 
         }
-        public void OnMonsterDeath(Monster monster) {
-            if (monster == _selectedMonsterA) { _selectedMonsterA = null; }
-        }
+        public void OnQuestLeave(int questId) { _selectedMonsterA = null; }
+        public void OnQuestComplete(int questId) { _selectedMonsterA = null; }
+        public void OnQuestFail(int questId) { _selectedMonsterA = null; }
+        public void OnQuestReturn(int questId) { _selectedMonsterA = null; }
+        public void OnQuestAbandon(int questId) { _selectedMonsterA = null; }
+        public void OnQuestEnter(int questId) { _selectedMonsterA = null; }
 
         public unsafe void OnImGuiRender()
         {
