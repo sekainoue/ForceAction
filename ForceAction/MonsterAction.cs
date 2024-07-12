@@ -50,7 +50,7 @@ namespace MonsterAction
             var monsters = Monster.GetAllMonsters().TakeLast(8).ToArray();
             if (monsters == null)
                 return;
-            if (ImGui.BeginCombo("Monster Act", $"{_selectedMonsterA?.Name ?? "Select Monster"}"))
+            if (ImGui.BeginCombo("LShift Z", $"{_selectedMonsterA?.Name ?? "Select Monster"}"))
             {
                 foreach (var monster in monsters)
                 {
@@ -105,7 +105,7 @@ namespace MonsterAction
                 ImGui.EndCombo();
             }
 
-            if (KeyBindings.IsPressed("DoIt") || ImGui.Button("Press to Act##monster"))
+            if (KeyBindings.IsPressed("DoIt") || ImGui.Button("Action##monster"))
             {
                 if (_selectedMonsterA == null)
                     return;
