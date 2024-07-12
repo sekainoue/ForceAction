@@ -16,42 +16,45 @@ namespace MonsterAction
         public string Author => "Seka";
 
 
+        private int _selectedActionM;
+        private Monster? _selectedMonsterA = null;
+        private uint _lastStage;
         public void OnLoad() 
         {
             KeyBindings.AddKeybind("DoIt", new Keybind<Key>(Key.Z, [Key.LeftShift]));
         }
 
-        private int _selectedActionM;
-
-        private Monster? _selectedMonsterA = null;
-
+        private void ResetState()
+        {
+            _selectedMonsterA = null;
+            _lastStage = (uint)Area.CurrentStage;
+        }
+        public void OnUpdate(float dt)
+        {
+            if ((uint)Area.CurrentStage != _lastStage)
+            {
+                ResetState();
+            }
+        }
+        public void OnQuestLeave(int questId) { ResetState(); }
+        public void OnQuestComplete(int questId) { ResetState(); }
+        public void OnQuestFail(int questId) { ResetState(); }
+        public void OnQuestReturn(int questId) { ResetState(); }
+        public void OnQuestAbandon(int questId) { ResetState(); }
+        public void OnQuestEnter(int questId) { ResetState(); }
         public void OnMonsterDestroy(Monster monster) { if (monster == _selectedMonsterA) { _selectedMonsterA = null; } }
         public void OnMonsterDeath(Monster monster) { if (monster == _selectedMonsterA) { _selectedMonsterA = null; } }
-        private uint _lastStage;
-        public void OnMonsterCreate(Monster monster) { uint stageID = (uint)Area.CurrentStage; _lastStage = stageID; }
-        public void OnUpdate(float dt) 
-        { 
-            if ((uint)Area.CurrentStage != _lastStage) { 
-                _selectedMonsterA = null; 
-            } 
-        }
-        public void OnQuestLeave(int questId) { _selectedMonsterA = null; }
-        public void OnQuestComplete(int questId) { _selectedMonsterA = null; }
-        public void OnQuestFail(int questId) { _selectedMonsterA = null; }
-        public void OnQuestReturn(int questId) { _selectedMonsterA = null; }
-        public void OnQuestAbandon(int questId) { _selectedMonsterA = null; }
-        public void OnQuestEnter(int questId) { _selectedMonsterA = null; }
 
         public unsafe void OnImGuiRender()
         {
-            var monsters = Monster.GetAllMonsters().ToArray();
+            var monsters = Monster.GetAllMonsters().TakeLast(8).ToArray();
             if (monsters == null)
                 return;
-            if (ImGui.BeginCombo("Monster Act", $"{_selectedMonsterA}"))
+            if (ImGui.BeginCombo("Monster Act", $"{_selectedMonsterA?.Name ?? "Select Monster"}"))
             {
                 foreach (var monster in monsters)
                 {
-                    if (ImGui.Selectable($"{monster}", _selectedMonsterA == monster))
+                    if (ImGui.Selectable($"{monster.Name}", _selectedMonsterA == monster))
                     {
                         _selectedMonsterA = monster;
                     }
@@ -63,7 +66,6 @@ namespace MonsterAction
                 return;
 
             var actionController = _selectedMonsterA.ActionController;
-
             if (actionController == null)
                 return;
 
@@ -77,7 +79,7 @@ namespace MonsterAction
 
 
             var action = secondActionListM[_selectedActionM];
-            var actionName = (action is null || action.Instance == 0) ? "N/A" : action.Name;
+            var actionName = action?.Name ?? "N/A";
             int actionId = _selectedActionM;
 
             if (ImGui.BeginCombo("Lshift + Z", $"{actionId} {actionName}"))
