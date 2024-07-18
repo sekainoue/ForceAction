@@ -18,7 +18,7 @@ namespace MonsterAction
 
         private int _selectedActionM;
         private Monster? _selectedMonsterA = null;
-        private uint _lastStage;
+        private uint _lastStage = 0;
         public void OnLoad() 
         {
             KeyBindings.AddKeybind("DoIt", new Keybind<Key>(Key.Z, [Key.LeftShift]));
@@ -50,7 +50,7 @@ namespace MonsterAction
             var monsters = Monster.GetAllMonsters().TakeLast(8).ToArray();
             if (monsters == null)
                 return;
-            if (ImGui.BeginCombo("LShift Z", $"{_selectedMonsterA?.Name ?? "Select Monster"}"))
+            if (ImGui.BeginCombo("LShift Z", $"{_selectedMonsterA}"))
             {
                 foreach (var monster in monsters)
                 {
