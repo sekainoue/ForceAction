@@ -6,6 +6,7 @@ using SharpPluginLoader.Core.Memory;
 using SharpPluginLoader.Core.IO;
 using System.Numerics;
 using System.Threading;
+using System.Runtime.CompilerServices;
 
 
 namespace MonsterAction
@@ -19,6 +20,8 @@ namespace MonsterAction
         private int _selectedActionM;
         private Monster? _selectedMonsterA = null;
         private uint _lastStage = 0;
+        private bool _enraged = false;
+        private nint _setTarget;
         public void OnLoad() 
         {
             KeyBindings.AddKeybind("DoIt", new Keybind<Key>(Key.Z, [Key.LeftShift]));
@@ -54,7 +57,8 @@ namespace MonsterAction
             {
                 foreach (var monster in monsters)
                 {
-                    if (ImGui.Selectable($"{monster.Name}", _selectedMonsterA == monster))
+                    //if (ImGui.Selectable($"{monster.Name}", _selectedMonsterA == monster))
+                    if (ImGui.Selectable($"{monster}", _selectedMonsterA == monster))
                     {
                         _selectedMonsterA = monster;
                     }
@@ -113,6 +117,32 @@ namespace MonsterAction
                 _selectedMonsterA.ForceAction(actionId);
                 Log.Info($"{_selectedMonsterA} FORCED {actionId} {actionName}");
             }
+
+            if (ImGui.Button("Enrage"))
+            {
+                if (_selectedMonsterA == null) return;
+                _selectedMonsterA.Enrage();
+            }
+            if (ImGui.Button("Unenrage"))
+            {
+                if (_selectedMonsterA == null) return;
+                _selectedMonsterA.Unenrage();
+            }
+
+
+            /*
+            nint setTarget = _setTarget;
+            if (ImGui.InputScalar("Target nint", ImGuiDataType.S32, new IntPtr(Unsafe.AsPointer(ref setTarget))))
+            {
+                _setTarget = setTarget;
+            }
+            var me = Player.MainPlayer;
+            if (me == null) return;
+            nint myNint = me.Instance;
+            if (ImGui.Button("Target Me"))
+            {
+                _selectedMonsterA.SetTarget(myNint);
+            }*/
         }
     }
 }
