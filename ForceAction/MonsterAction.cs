@@ -7,6 +7,7 @@ using SharpPluginLoader.Core.IO;
 using System.Numerics;
 using System.Threading;
 using System.Runtime.CompilerServices;
+using SharpPluginLoader.Core.MtTypes;
 
 
 namespace MonsterAction
@@ -22,7 +23,11 @@ namespace MonsterAction
         private uint _lastStage = 0;
         private bool _enraged = false;
         private nint _setTarget;
-        public void OnLoad() 
+        private float _newRotationX;
+        private float _newRotationY;
+        private float _newRotationZ;
+        public bool _targetOn = false;
+        public void OnLoad()
         {
             KeyBindings.AddKeybind("DoIt", new Keybind<Key>(Key.Z, [Key.LeftShift]));
         }
@@ -30,13 +35,20 @@ namespace MonsterAction
         private void ResetState()
         {
             _selectedMonsterA = null;
-            _lastStage = (uint)Area.CurrentStage;
         }
         public void OnUpdate(float dt)
         {
             if ((uint)Area.CurrentStage != _lastStage)
             {
                 ResetState();
+            }
+
+            var me = Player.MainPlayer;
+            if (me == null) return;
+            nint myNint = me.Instance;
+            if (_targetOn && _selectedMonsterA != null)
+            {
+                _selectedMonsterA.SetTarget(myNint);
             }
         }
         public void OnQuestLeave(int questId) { ResetState(); }
@@ -53,7 +65,15 @@ namespace MonsterAction
             var monsters = Monster.GetAllMonsters().TakeLast(8).ToArray();
             if (monsters == null)
                 return;
-            if (ImGui.BeginCombo("LShift Z", $"{_selectedMonsterA}"))
+
+            if (ImGui.Button("Unset"))
+            {
+                _selectedMonsterA = null;
+            }
+
+            ImGui.SameLine();
+            ImGui.PushItemWidth(200.0f);
+            if (ImGui.BeginCombo("Monster", $"{_selectedMonsterA}"))
             {
                 foreach (var monster in monsters)
                 {
@@ -61,13 +81,29 @@ namespace MonsterAction
                     if (ImGui.Selectable($"{monster}", _selectedMonsterA == monster))
                     {
                         _selectedMonsterA = monster;
+                        _lastStage = (uint)Area.CurrentStage;
                     }
                 }
                 ImGui.EndCombo();
             }
+            ImGui.PopItemWidth();
 
             if (_selectedMonsterA == null)
                 return;
+
+            ImGui.SameLine();
+            if (ImGui.Button("Enrage"))
+            {
+                if (_selectedMonsterA == null) return;
+                _selectedMonsterA.Enrage();
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button("Unenrage"))
+            {
+                if (_selectedMonsterA == null) return;
+                _selectedMonsterA.Unenrage();
+            }
 
             var actionController = _selectedMonsterA.ActionController;
             if (actionController == null)
@@ -86,6 +122,7 @@ namespace MonsterAction
             var actionName = action?.Name ?? "N/A";
             int actionId = _selectedActionM;
 
+            ImGui.PushItemWidth(250.0f);
             if (ImGui.BeginCombo("Lshift + Z", $"{actionId} {actionName}"))
             {
                 for (var l = 0; l < secondActionListM.Count; ++l)
@@ -108,7 +145,9 @@ namespace MonsterAction
                 }
                 ImGui.EndCombo();
             }
+            ImGui.PopItemWidth();
 
+            ImGui.SameLine();
             if (KeyBindings.IsPressed("DoIt") || ImGui.Button("Action##monster"))
             {
                 if (_selectedMonsterA == null)
@@ -118,31 +157,54 @@ namespace MonsterAction
                 Log.Info($"{_selectedMonsterA} FORCED {actionId} {actionName}");
             }
 
-            if (ImGui.Button("Enrage"))
+            ImGui.SameLine();
+            if (ImGui.Button("AllDo"))
             {
-                if (_selectedMonsterA == null) return;
-                _selectedMonsterA.Enrage();
-            }
-            if (ImGui.Button("Unenrage"))
-            {
-                if (_selectedMonsterA == null) return;
-                _selectedMonsterA.Unenrage();
+                foreach (var monster in monsters)
+                {
+                    monster.ForceAction(actionId);
+                }
             }
 
+            if (ImGui.Button("0"))
+            {
+                _selectedMonsterA.Rotation.X = 0f;
+                _selectedMonsterA.Rotation.Y = 0f;
+                _selectedMonsterA.Rotation.Z = 0f;
+            }
+            ImGui.PushItemWidth(150.0f);
+            if (ImGui.SliderFloat("X", ref _newRotationX, -180f, 180f))
+            {
+                _selectedMonsterA.Rotation.X = _newRotationX / 100f;
+            }
+            ImGui.SameLine();
+            if (ImGui.SliderFloat("Y", ref _newRotationY, -180f, 180f))
+            {
+                _selectedMonsterA.Rotation.Y = _newRotationY / 100f;
+            }
+            ImGui.SameLine();
+            if (ImGui.SliderFloat("Z", ref _newRotationZ, -180f, 180f))
+            {
+                _selectedMonsterA.Rotation.Z = _newRotationZ / 100;
+            }
+            ImGui.PopItemWidth();
 
-            /*
+
+            
+
             nint setTarget = _setTarget;
-            if (ImGui.InputScalar("Target nint", ImGuiDataType.S32, new IntPtr(Unsafe.AsPointer(ref setTarget))))
+            if (ImGui.InputScalar("Target nint", ImGuiDataType.S64, MemoryUtil.AddressOf(ref setTarget))) // nint is a 64 bit integer
+                // MemoryUtil.AddressOf(ref setTarget)
+                // is the same as
+                // new IntPtr(Unsafe.AsPointer(ref setTarget)
             {
                 _setTarget = setTarget;
             }
-            var me = Player.MainPlayer;
-            if (me == null) return;
-            nint myNint = me.Instance;
+            
             if (ImGui.Button("Target Me"))
             {
-                _selectedMonsterA.SetTarget(myNint);
-            }*/
+                _targetOn = true;
+            }
         }
     }
 }
