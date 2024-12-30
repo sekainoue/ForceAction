@@ -30,6 +30,7 @@ namespace MonsterAction
         public void OnLoad()
         {
             KeyBindings.AddKeybind("DoIt", new Keybind<Key>(Key.Z, [Key.LeftShift]));
+            // KeyBindings.AddKeybind("FlyReturn", new Keybind<Key>(Key.X, [Key.LeftShift]));
         }
 
         private void ResetState()
@@ -50,6 +51,16 @@ namespace MonsterAction
             {
                 _selectedMonsterA.SetTarget(myNint);
             }
+
+            if (_selectedMonsterA == null)
+                return;
+            
+            /*if (KeyBindings.IsPressed("FlyReturn"))
+            {
+                _selectedMonsterA.Teleport(new Vector3 (975.5f, 2474.9f, 11255.8f));
+                _selectedMonsterA.Rotation.Y = 180f;
+                _selectedMonsterA.ForceAction(178);
+            }*/
         }
         public void OnQuestLeave(int questId) { ResetState(); }
         public void OnQuestComplete(int questId) { ResetState(); }
